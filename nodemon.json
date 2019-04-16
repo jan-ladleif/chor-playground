@@ -2,5 +2,5 @@
   "watch": ["src"],
   "ext": "ts",
   "ignore": ["src/**/*.spec.ts"],
-  "exec": "npm run type-check && npm run build && npm run serve"
+  "exec": "npm run build && npm run serve"
 }

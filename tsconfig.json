@@ -3,7 +3,7 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "target": "es6",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "moduleResolution": "node",
     "sourceMap": true,
     "declaration": true,
@@ -11,8 +11,7 @@
     "baseUrl": ".",
     "paths": {
       "*": [
-        "node_modules/*",
-        "src/types/*"
+        "node_modules/*"
       ]
     }
   },
