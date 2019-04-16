@@ -1,22 +1,13 @@
-import BpmnModdle from 'bpmn-moddle';
 import express from 'express';
 import * as fs from 'fs';
+import * as path from 'path';
 
-const moddle = new BpmnModdle();
+import {
+  is,
+  parseModdle,
+} from './helpers';
 
-export let parseModdle = (xml: string): Promise<object> => {
-  return new Promise<object>((resolve, reject) => {
-    moddle.fromXML(xml, (err: any, definitions: object) => {
-      if (!err) {
-        resolve(definitions);
-      } else {
-        reject(err);
-      }
-    });
-  });
-};
-
-const sample = JSON.parse(fs.readFileSync('../assets/V7.bpmn', 'utf-8'));
+const sample = fs.readFileSync(path.join(__dirname, '/../assets/sample.bpmn'), 'utf-8');
 
 const app = express();
 
@@ -26,7 +17,7 @@ app.get('/', (req, res) => {
 
 app.get('/test', (req, res) => {
   parseModdle(sample).then((result) => {
-    res.status(201).send(result);
+    res.status(201).send(result.rootElements.filter(is('bpmn:Choreography')));
   });
 });
 
