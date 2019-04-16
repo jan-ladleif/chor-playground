@@ -24,6 +24,15 @@ The repository also contains some basic examples on how to load and use BPMN mod
 - `tsconfig.json` | TypeScript transpiler configuration
 - `tslint.json` | [TSLint](https://github.com/palantir/tslint) configuration (code style)
 
+## Routes
+
+There are two sample routes:
+
+- `/gateways`  
+  Returns all the gateways in the `sample.bpmn` sample.
+- `/neighbors/:id`  
+  Returns all the predecessors/successors of the element with the given ID from the `order.bpmn` example.
+
 ## Usage
 
 ### Running Locally
