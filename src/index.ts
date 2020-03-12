@@ -38,67 +38,67 @@ app.get('/', (req, res) => {
     //   });
     // });
 
+    // element type counter
+    // const promises = list.map(fileName => {
+    //   let fileContent;
+    //   return fs.readFile('./models/' + fileName).then(content => {
+    //     fileContent = content.toString();
+    //     return parseModdle(fileContent);
+    //   }).then((definitions: any) => {
+    //     return xmlParser.getTraversalObj(fileContent, xmlOptions);
+    //   }).then((traversal: any) => {
+    //     let counter = {};
+    //     let traverse = (obj) => {
+    //       counter[obj.tagname] = 1 + (counter[obj.tagname] || 0);
+    //       for (let type in obj.child) {
+    //         obj.child[type].forEach(traverse);
+    //       }
+    //     };
+    //     traverse(traversal);
+    //     return { _fileName: fileName, _valid: true, ...counter };
+    //   }).catch(error => {
+    //     return { _fileName: fileName, _valid: false, _importError: error };
+    //   });
+    // });
+
+    // timer event definitions
     const promises = list.map(fileName => {
+      let fileContent;
       return fs.readFile('./models/' + fileName).then(content => {
-        return xmlParser.getTraversalObj(content.toString(), xmlOptions);
-      }).then((definitions: any) => {
-        let counter = {};
+        fileContent = content.toString();
+        return xmlParser.getTraversalObj(fileContent, xmlOptions);
+      }).then((traversal: any) => {
+        let expressions = [];
         let traverse = (obj) => {
-          counter[obj.tagname] = 1 + (counter[obj.tagname] || 0);
+          const tagname = obj.tagname;
+
+          if (tagname == 'timeDuration' || tagname == 'timeCycle' || tagname == 'timeDate') {
+            expressions.push(obj.val);
+          }
+
           for (let type in obj.child) {
             obj.child[type].forEach(traverse);
           }
         };
-        traverse(definitions);
-        return [fileName, true, counter];
+        traverse(traversal);
+
+        if (expressions.length > 0) {
+          return { _fileName: fileName, _valid: true, ...expressions };
+        } else {
+          return false;
+        }
       }).catch(error => {
-        return [fileName, false, error];
+        // do not log errors
+        return false;
       });
     });
 
     return Promise.all(promises);
   }).then(results => {
-    const data = results
-      // .filter(res => res[1])
-      .map(res => { return Object.assign({ filename: res[0], result: res[1] }, res[2]) });
-
+    results = results.filter(res => res);
     const json2csvParser = new Parser({ });
-    const csv = json2csvParser.parse(data);
+    const csv = json2csvParser.parse(results);
     res.attachment('results.csv');
     res.status(200).send(csv);
   });
 });
-
-// // route that returns all the gateways from `sample`
-// app.get('/gateways', (req, res) => {
-//   parseModdle(sample).then((definitions) => {
-//     const choreography = <Choreography> definitions.rootElements.find(is('bpmn:Choreography'));
-//     if (!choreography) {
-//       return res.status(501).send('could not find a choreography instance');
-//     }
-//     const gateways = <Gateway[]> choreography.flowElements.filter(is('bpmn:Gateway'));
-//     res.status(201).send(gateways);
-//   });
-// });
-
-// // route that returns all the predecessors/successors of flow nodes from `order`
-// // example: http://localhost:3000/neighbors/ExclusiveGateway_0f1f4ys
-// app.get('/neighbors/:id', (req, res) => {
-//   parseModdle(order).then((definitions) => {
-//     const choreography = <Choreography> definitions.rootElements.find(is('bpmn:Choreography'));
-//     if (!choreography) {
-//       return res.status(501).send('could not find a choreography instance');
-//     }
-//     const id = req.params['id'];
-//     const element = <FlowNode> choreography.flowElements.find((element) => element.id == id);
-//     if (!element) {
-//       return res.status(501).send('could not find element with specified id');
-//     }
-//     const predecessors = <FlowNode[]> element.incoming.map(flow => flow.sourceRef);
-//     const successors = <FlowNode[]> element.outgoing.map(flow => flow.targetRef);
-//     res.status(201).send({
-//       predecessors: predecessors,
-//       successors: successors
-//     });
-//   });
-// });
